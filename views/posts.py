@@ -41,11 +41,14 @@ def get_posts(userid):
     except:
         return jsonify({'message':'user not found'})
 
-    posts = Post.objects(user=userobj).order_by("-created").skip(pageSize*(pageIndex-1)).limit(pageSize)
+    posts = Post.objects(user=userobj).order_by("-created")
+    paged_posts = posts.skip(pageSize*(pageIndex-1)).limit(pageSize)
 
-    post_lst = []
-    for obj in posts:
-        tmp = obj.to_public_json()
-        post_lst.append(tmp)
+    # post_lst = []
+    # for obj in paged_posts:
+    #     tmp = obj.to_public_json()
+    #     post_lst.append(tmp)
 
-    return jsonify({'data':post_lst})
+    post_lst = paged_posts.to_public_jsons()
+
+    return jsonify({'data':post_lst,'total': posts.count()})

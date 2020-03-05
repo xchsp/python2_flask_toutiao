@@ -5,6 +5,18 @@ from  mongoengine import *
 
 connect("yesterday_toutiao")
 
+class CustomQuerySet(QuerySet):
+    def to_public_jsons(self):
+        result = []
+        try:
+            for obj in self:
+                tmp = obj.to_public_json()
+                result.append(tmp)
+        except:
+            print('error')
+
+        return result
+
 class User(Document):
     email = EmailField(required=True, unique=True)
     username = StringField(max_length=50, required=True, unique=True)
@@ -31,7 +43,8 @@ class Comment(EmbeddedDocument):
 
 class Category(Document):
     name = StringField(max_length=120, required=True)
-    # meta = {'queryset_class': CustomQuerySet}
+
+    meta = {'queryset_class': CustomQuerySet}
 
     def to_public_json(self):
         data = {
@@ -72,7 +85,7 @@ class Post(Document):
     has_like = BooleanField(required=False)
     has_follow = BooleanField(required=False)
 
-    # meta = {'queryset_class': CustomQuerySet}
+    meta = {'queryset_class': CustomQuerySet}
 
     def to_public_json(self):
         data = {
