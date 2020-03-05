@@ -29,3 +29,23 @@ def posts_create(userid):
     ).save()
 
     return jsonify({'message':'success'})
+
+@app.route('/api/get_posts')
+@login_required
+def get_posts(userid):
+    pageIndex = int(request.args.get('pageIndex'))
+    pageSize = int(request.args.get('pageSize'))
+
+    try:
+        userobj = User.objects(id=userid).first()
+    except:
+        return jsonify({'message':'user not found'})
+
+    posts = Post.objects(user=userobj).order_by("-created").skip(pageSize*(pageIndex-1)).limit(pageSize)
+
+    post_lst = []
+    for obj in posts:
+        tmp = obj.to_public_json()
+        post_lst.append(tmp)
+
+    return jsonify({'data':post_lst})
