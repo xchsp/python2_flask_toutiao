@@ -2,7 +2,7 @@ from flask import jsonify, request
 from mongoengine import ValidationError
 
 from app import app
-from model import User, Post, Cover, Category
+from model import User, Post, Cover, Category, Comment
 from views.auth import login_required
 
 
@@ -142,3 +142,22 @@ def posts_detail(userid,id):
         return jsonify({"error": "Post not found"}), 404
 
     return jsonify(post.to_public_json())
+
+@app.route("/api/create_comment/<string:id>", methods=["POST"])
+@login_required
+def posts_create_comment(userid, id):
+    if not request.json.get('content'):
+        return jsonify({"error": "No content specified"}), 409
+    content = request.json.get('content')
+
+    try:
+        post = Post.objects(pk=id).first()
+    except ValidationError:
+        return jsonify({"error": "Post not found"}), 404
+
+    user = User.objects(id=userid).first()
+    comments = post.comments
+    comments.append(Comment(user=user, content=content))
+    post.save()
+
+    return jsonify({'message':'添加评论成功'})
