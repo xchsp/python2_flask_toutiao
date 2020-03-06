@@ -66,6 +66,22 @@ def posts_update(userid,pid):
     return jsonify(post.to_public_json())
 
 
+@app.route('/api/get_cate_posts')
+@login_required
+def get_cate_posts(userid):
+    pageIndex = int(request.args.get('pageIndex'))
+    pageSize = int(request.args.get('pageSize'))
+    cateID = request.args.get('category')
+
+
+
+    posts = Post.objects(categories=cateID).order_by("-created")
+    paged_posts = posts.skip(pageSize*(pageIndex-1)).limit(pageSize)
+
+    post_lst = paged_posts.to_public_jsons()
+
+    return jsonify({'data':post_lst,'total': posts.count()})
+
 @app.route('/api/get_posts')
 @login_required
 def get_posts(userid):
