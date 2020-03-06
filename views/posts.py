@@ -143,6 +143,36 @@ def posts_detail(userid,id):
 
     return jsonify(post.to_public_json())
 
+@app.route("/api/get_comments/<string:id>", methods=["GET"])
+@login_required
+def get_comments(userid,id):
+    try:
+        post = Post.objects(pk=id).first()
+    except ValidationError:
+        return jsonify({"error": "Post not found"}), 404
+
+    if not request.args.get('pageSize'):
+        pageSize = len(post.comments)
+    else:
+        pageSize = int(request.args.get('pageSize'))
+
+    commentLst = []
+    for comment in post.comments[::-1]:
+        commentLst.append({
+            "content": comment.content,
+            "created": comment.created.strftime("%Y-%m-%d %H:%M:%S"),
+            "user": {
+                "id": str(comment.user.id),
+                "nickname": comment.user.username
+            }
+        })
+
+        pageSize -= 1
+        if pageSize == 0:
+            break
+
+    return jsonify(commentLst)
+
 @app.route("/api/create_comment/<string:id>", methods=["POST"])
 @login_required
 def posts_create_comment(userid, id):
