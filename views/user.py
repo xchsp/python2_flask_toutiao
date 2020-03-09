@@ -62,3 +62,46 @@ def user_comments(userid):
         pass
 
     return jsonify(commentLst)
+
+
+@app.route("/api/user_star")
+@login_required
+def user_star(userid):
+    try:
+        user = User.objects(pk=userid).first()
+        posts = Post.objects(user_collect=user)
+
+        return jsonify(posts.to_public_jsons())
+    except:
+        pass
+
+    return jsonify([])
+
+
+@app.route("/api/user_follows")
+@login_required
+def user_follows(userid):
+    try:
+        user = User.objects(pk=userid).first()
+
+        userLst = []
+        for user in user.user_followed:
+            userLst.append(user.to_public_json())
+
+        return jsonify(userLst)
+    except:
+        pass
+
+    return jsonify([])
+
+
+@app.route("/api/me")
+@login_required
+def get_user_info(userid):
+    try:
+        user = User.objects(pk=userid).first()
+        return jsonify(user.to_public_json())
+    except:
+        pass
+
+    return jsonify({})

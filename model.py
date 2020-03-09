@@ -26,12 +26,15 @@ class User(Document):
     gender = IntField(required=True)
     user_followed = ListField(ReferenceField("User"))#关注别人
 
+    # meta = {'queryset_class': CustomQuerySet}
+
     def to_public_json(self):
         data = {
             "id": str(self.id),
             "username": self.username,
             "head_img": self.head_img,
             "gender": self.gender,
+            "created": self.created.strftime("%Y-%m-%d"),
         }
 
         return data
