@@ -138,6 +138,15 @@ def posts_detail(userid,id):
         # If post has alreay been deleted
         if not post:
             raise ValidationError
+
+        user = User.objects(pk=userid).first()
+        user_collect = post.user_collect
+        usernameLst = [u.username for u in user_collect]
+        if user.username in usernameLst:
+            post.has_star = True
+        else:
+            post.has_star = False
+
     except ValidationError:
         return jsonify({"error": "Post not found"}), 404
 
@@ -148,6 +157,7 @@ def posts_detail(userid,id):
 def get_comments(userid,id):
     try:
         post = Post.objects(pk=id).first()
+
     except ValidationError:
         return jsonify({"error": "Post not found"}), 404
 
@@ -191,3 +201,27 @@ def posts_create_comment(userid, id):
     post.save()
 
     return jsonify({'message':'添加评论成功'})
+
+
+@app.route("/api/post_star/<string:pid>", methods=["POST"])
+@login_required
+def post_star(userid, pid):
+    resp = {}
+    try:
+        post = Post.objects(pk=pid).first()
+        user = User.objects(pk=userid).first()
+        user_collect = post.user_collect
+        usernameLst = [u.username for u in user_collect]
+        if user.username in usernameLst:
+            userIndex = usernameLst.index(user.username)
+            user_collect.pop(userIndex)
+            post.save()
+            resp['message'] = '取消收藏成功'
+        else:
+            user_collect.append(user)
+            post.save()
+            resp['message'] = '收藏成功'
+    except:
+        pass
+
+    return jsonify(resp)
