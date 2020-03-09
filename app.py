@@ -15,7 +15,7 @@ from views.category import *
 from views.errors import *
 from views.posts import *
 from views.upload import *
-
+from views.user import *
 
 if __name__ == '__main__':
     # Category(name='java').save()

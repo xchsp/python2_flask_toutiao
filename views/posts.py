@@ -140,12 +140,25 @@ def posts_detail(userid,id):
             raise ValidationError
 
         user = User.objects(pk=userid).first()
+
         user_collect = post.user_collect
         usernameLst = [u.username for u in user_collect]
         if user.username in usernameLst:
             post.has_star = True
         else:
             post.has_star = False
+
+        user_agree = post.user_agree
+        usernameLst = [u.username for u in user_agree]
+        if user.username in usernameLst:
+            post.has_like = True
+        else:
+            post.has_like = False
+
+        if post.user in user.user_followed:
+            post.has_follow = True
+        else:
+            post.has_follow = False
 
     except ValidationError:
         return jsonify({"error": "Post not found"}), 404
@@ -221,6 +234,29 @@ def post_star(userid, pid):
             user_collect.append(user)
             post.save()
             resp['message'] = '收藏成功'
+    except:
+        pass
+
+    return jsonify(resp)
+
+@app.route("/api/post_like/<string:pid>", methods=["POST"])
+@login_required
+def post_like(userid, pid):
+    resp = {}
+    try:
+        post = Post.objects(pk=pid).first()
+        user = User.objects(pk=userid).first()
+        user_agree = post.user_agree
+        usernameLst = [u.username for u in user_agree]
+        if user.username in usernameLst:
+            userIndex = usernameLst.index(user.username)
+            user_agree.pop(userIndex)
+            post.save()
+            resp['message'] = '取消点赞成功'
+        else:
+            user_agree.append(user)
+            post.save()
+            resp['message'] = '点赞成功'
     except:
         pass
 
