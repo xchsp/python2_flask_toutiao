@@ -35,3 +35,30 @@ def user_follow(userid, uid):
         pass
 
     return jsonify(resp)
+
+@app.route("/api/user_comments")
+@login_required
+def user_comments(userid):
+    try:
+        user = User.objects(pk=userid).first()
+
+        commentLst = []
+        posts = Post.objects(comments__user=user)
+        for post in posts:
+            comments = post.comments
+            for comment in comments:
+                if comment.user.id == user.id:
+                    obj = {
+                            "content": comment.content,
+                            "created": comment.created.strftime("%Y-%m-%d %H:%M:%S"),
+                            "user": {
+                                "id": str(comment.user.id),
+                                "nickname": comment.user.username
+                            }
+                    }
+
+                    commentLst.append(obj)
+    except:
+        pass
+
+    return jsonify(commentLst)
