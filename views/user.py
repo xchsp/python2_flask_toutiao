@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 
 from app import app
 from model import Post, User
@@ -100,6 +100,23 @@ def user_follows(userid):
 def get_user_info(userid):
     try:
         user = User.objects(pk=userid).first()
+        return jsonify(user.to_public_json())
+    except:
+        pass
+
+    return jsonify({})
+
+
+@app.route("/api/update_user",methods=['POST'])
+@login_required
+def update_user(userid):
+    try:
+        user = User.objects(pk=userid).first()
+
+        if request.json.get('head_img'):
+            user.head_img = request.json.get('head_img')
+
+        user.save()
         return jsonify(user.to_public_json())
     except:
         pass
