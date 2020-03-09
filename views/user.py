@@ -1,4 +1,5 @@
 from flask import jsonify, request
+from werkzeug.security import generate_password_hash
 
 from app import app
 from model import Post, User
@@ -115,6 +116,12 @@ def update_user(userid):
 
         if request.json.get('head_img'):
             user.head_img = request.json.get('head_img')
+        if request.json.get('username'):
+            user.username = request.json.get('username')
+        if request.json.get('password'):
+            user.password = generate_password_hash(request.json.get('password'))
+        if request.json.get('gender') != None:
+            user.gender = request.json.get('gender')
 
         user.save()
         return jsonify(user.to_public_json())
